@@ -41,36 +41,23 @@ public class GameExample extends StateBasedGame {
 
 # Структура каталогов проекта
 
+```tree
 MyGame/
-
 ├── src/
-|
 │   └── com/
-|
 │       └── mygame/
-|
 │           ├── Main.java
-|
 │           ├── MenuState.java
-|
 │           └── PlayState.java
-|
 ├── res/
-|
 │   ├── player.png
-|
 │   ├── background.png
-|
 │   ├── shoot.wav
-|
 │   └── music.ogg
-|
-|
 └── lib/
-
     ├── slick.jar
-    |
     └── lwjgl.jar
+```
     
     
 # Советы по разработке
