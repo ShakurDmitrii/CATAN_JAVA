@@ -1,12 +1,17 @@
 package org.example;
 
+import org.example.state.MainMenuState;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.state.*;
 
 public class Main extends BasicGame {
+
+    public static final int MAIN_MENU = 0;
+    public static final int GAME = 1;
 
     public Main(String title) {
         super(title);
@@ -15,6 +20,10 @@ public class Main extends BasicGame {
     @Override
     public void init(GameContainer gameContainer) throws SlickException {
         // Инициализация ресурсов, текстур и т.д.
+        this.addState(new MainMenuState(MAIN_MENU));
+        this.addState(new GameState(GAME));
+
+        this.enterState(MAIN_MENU);
     }
 
     @Override
