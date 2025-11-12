@@ -1,9 +1,11 @@
 package org.example.map;
 
+import org.example.Player;
+
 import java.awt.*;
 
 public class HexTile {
-
+    private int id;
     private float x, y;
     private String type;
     private int number;
@@ -17,6 +19,13 @@ public class HexTile {
         this.player = player;
 
     }
+    public int GetHexPlayer(int id){
+        if(id == player.getPlayerId() ){
+            return player.getPlayerId();
+        }
+        else return 0;
+    }
+
     public Color getColorByType() {
         switch (type.toLowerCase()) {
             case "wood":
@@ -54,4 +63,6 @@ public class HexTile {
         g.setColor(Color.black);
         g.drawString(""+number, (int) (x-5), (int) (y-5)); // номер гекса
     }
+
+
 }
