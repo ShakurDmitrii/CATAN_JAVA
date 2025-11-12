@@ -1,14 +1,12 @@
 package org.example;
 
 import org.example.state.MainMenuState;
+import org.example.state.GameState;
 import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.BasicGame;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.state.*;
+import org.newdawn.slick.state.StateBasedGame;
 
-public class Main extends BasicGame {
+public class Main extends StateBasedGame {
 
     public static final int MAIN_MENU = 0;
     public static final int GAME = 1;
@@ -18,23 +16,11 @@ public class Main extends BasicGame {
     }
 
     @Override
-    public void init(GameContainer gameContainer) throws SlickException {
-        // Инициализация ресурсов, текстур и т.д.
+    public void initStatesList(org.newdawn.slick.GameContainer container) throws SlickException {
         this.addState(new MainMenuState(MAIN_MENU));
         this.addState(new GameState(GAME));
 
         this.enterState(MAIN_MENU);
-    }
-
-    @Override
-    public void update(GameContainer gameContainer, int delta) throws SlickException {
-        // Логика игры
-    }
-
-    @Override
-    public void render(GameContainer gameContainer, Graphics graphics) throws SlickException {
-        // Рисуем текст
-        graphics.drawString("Привет, Slick2D!", 100, 100);
     }
 
     public static void main(String[] args) {
@@ -42,7 +28,7 @@ public class Main extends BasicGame {
 
         try {
             AppGameContainer app = new AppGameContainer(new Main("Моя первая игра на Slick2D"));
-            app.setDisplayMode(1080, 720, false); // ширина, высота, полноэкранный режим (false)
+            app.setDisplayMode(2160, 720, false); // ширина, высота, полноэкранный режим
             app.start();
         } catch (SlickException e) {
             e.printStackTrace();

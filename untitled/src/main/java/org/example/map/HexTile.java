@@ -1,8 +1,11 @@
 package org.example.map;
 
 import org.example.Player;
+import org.newdawn.slick.geom.Polygon;
+import org.newdawn.slick.Color;
 
-import java.awt.*;
+import org.newdawn.slick.Graphics; // ✅ правильно
+
 
 public class HexTile {
     private int id;
@@ -57,11 +60,13 @@ public class HexTile {
     }
 
     public void render(Graphics g) {
-        // отрисовать шестиугольник с текстурой или цветом
+        Polygon hex = createHex(x, y, 50);  // создаём шестиугольник
         g.setColor(getColorByType());
-        g.fillPolygon(createHex(x, y, 50)); // 50 — радиус
+        g.fill(hex);                        // ✅ fill(Shape)
         g.setColor(Color.black);
-        g.drawString(""+number, (int) (x-5), (int) (y-5)); // номер гекса
+        g.draw(hex);                         // рамка шестиугольника
+        g.drawString(""+number, x - 5, y - 5);
+
     }
 
 
