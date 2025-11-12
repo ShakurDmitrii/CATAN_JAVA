@@ -2,6 +2,7 @@
 Catan game Java version 
 # Slick2d
 Slick2D - это упрощенная Java-библиотека для создания 2D игр, построенная на основе LWJGL. Вот как начать писать игры на Slick2D
+https://sourceforge.net/projects/java-game-lib/
 # Команды
 mvn clean compile   # Очистка и компиляция
 mvn package         # Сборка JAR файла
