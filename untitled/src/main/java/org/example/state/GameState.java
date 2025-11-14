@@ -16,11 +16,13 @@ public class GameState extends BasicGameState {
 
     public GameState(int id) {
         this.stateID = id;
+
     }
 
     @Override
     public int getID() {
         return stateID;
+
     }
 
     @Override
