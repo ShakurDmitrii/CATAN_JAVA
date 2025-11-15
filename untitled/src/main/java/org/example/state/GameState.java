@@ -204,6 +204,7 @@ public class GameState extends BasicGameState {
         if (mx >= endTurnX && mx <= endTurnX + endTurnWidth &&
                 my >= endTurnY && my <= endTurnY + endTurnHeight) {
             endTurn();
+            startNewTurn();
             return;
         }
 
