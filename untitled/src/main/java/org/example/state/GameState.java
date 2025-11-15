@@ -189,6 +189,8 @@ public class GameState extends BasicGameState {
 
         villagePlacedThisTurn = false;
         selectedPlayer = null;
+        turnTimer = turnTime;
+
     }
 
     private void handleClick(float mx, float my, GameContainer container) {
@@ -204,7 +206,7 @@ public class GameState extends BasicGameState {
         if (mx >= endTurnX && mx <= endTurnX + endTurnWidth &&
                 my >= endTurnY && my <= endTurnY + endTurnHeight) {
             endTurn();
-            startNewTurn();
+
             return;
         }
 

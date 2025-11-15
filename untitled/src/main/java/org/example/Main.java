@@ -27,14 +27,14 @@ public class Main extends StateBasedGame {
     }
 
     public static void main(String[] args) {
-        System.setProperty("org.lwjgl.librarypath", "C:\\lwjgl-2.9.3\\native\\windows");
+        System.setProperty("org.lwjgl.librarypath", "C:\\lwjgl-2.9.3\\lwjgl-2.9.3\\native\\windows");
 
         // Отключаем JInput контроллеры
         System.setProperty("net.java.games.input.useDefaultPlugin", "false");
 
         try {
             AppGameContainer app = new AppGameContainer(new Main("Catan"));
-            app.setDisplayMode(800, 600, false);
+            app.setDisplayMode(1720, 900, false);
             app.setTargetFrameRate(60);
             app.setShowFPS(false);
             app.setAlwaysRender(true);
