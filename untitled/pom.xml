@@ -21,6 +21,14 @@
         </repository>
     </repositories>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+    </build>
+
     <dependencies>
         <!-- Основная зависимость Slick2D -->
         <dependency>

@@ -17,6 +17,9 @@ public class Main extends StateBasedGame {
 
     @Override
     public void initStatesList(org.newdawn.slick.GameContainer container) throws SlickException {
+        // Отключаем контроллеры чтобы избежать ошибок
+        container.setForceExit(false);
+
         this.addState(new MainMenuState(MAIN_MENU));
         this.addState(new GameState(GAME));
 
@@ -24,11 +27,17 @@ public class Main extends StateBasedGame {
     }
 
     public static void main(String[] args) {
-        System.setProperty("org.lwjgl.librarypath", "C:\\lwjgl-2.9.3\\lwjgl-2.9.3\\native\\windows");
+        System.setProperty("org.lwjgl.librarypath", "C:\\lwjgl-2.9.3\\native\\windows");
+
+        // Отключаем JInput контроллеры
+        System.setProperty("net.java.games.input.useDefaultPlugin", "false");
 
         try {
-            AppGameContainer app = new AppGameContainer(new Main("Моя первая игра на Slick2D"));
-            app.setDisplayMode(2160, 720, false); // ширина, высота, полноэкранный режим
+            AppGameContainer app = new AppGameContainer(new Main("Catan"));
+            app.setDisplayMode(800, 600, false);
+            app.setTargetFrameRate(60);
+            app.setShowFPS(false);
+            app.setAlwaysRender(true);
             app.start();
         } catch (SlickException e) {
             e.printStackTrace();

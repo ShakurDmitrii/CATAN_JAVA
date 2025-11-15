@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/CATAN_JAVA.iml" filepath="$PROJECT_DIR$/.idea/CATAN_JAVA.iml" />
+      <module fileurl="file://$PROJECT_DIR$/untitled/my-slick2d-game.iml" filepath="$PROJECT_DIR$/untitled/my-slick2d-game.iml" />
     </modules>
   </component>
 </project>
