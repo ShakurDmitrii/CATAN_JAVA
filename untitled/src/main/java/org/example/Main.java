@@ -28,7 +28,7 @@ public class Main extends StateBasedGame {
 
         try {
             AppGameContainer app = new AppGameContainer(new Main("Моя первая игра на Slick2D"));
-            app.setDisplayMode(2160, 720, false); // ширина, высота, полноэкранный режим
+            app.setDisplayMode(2160, 1000, false); // ширина, высота, полноэкранный режим
             app.start();
         } catch (SlickException e) {
             e.printStackTrace();
