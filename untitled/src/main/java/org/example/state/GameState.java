@@ -1,6 +1,7 @@
 package org.example.state;
 
 import org.example.Main;
+import org.example.objects.Bank;
 import org.example.objects.Player;
 import org.example.objects.Cities;
 import org.example.map.HexTile;
@@ -22,6 +23,7 @@ public class GameState extends BasicGameState {
     private List<Village> villages = new ArrayList<>();
     private List<HexTile> tiles = new ArrayList<>();
     private int stateID;
+    private Bank bank;
 
     private boolean villagePlacedThisTurn = false;
     private Player selectedPlayer = null; // окно информации о игроке
@@ -41,6 +43,8 @@ public class GameState extends BasicGameState {
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
+        bank = new Bank();
+
         // создаём игроков
         players.add(new Player("Players 1", 1));
         players.add(new Player("Players 2", 2));
@@ -110,6 +114,39 @@ public class GameState extends BasicGameState {
             g.setColor(Color.white);
             g.drawString(p.getName(), menuX + 40, iconY);
         }
+        g.drawString("Bank", menuX + 10, menuY + 190);
+
+        int startX = menuX + 10;     // начальная позиция
+        int startY = menuY + 220;    // первая строка
+        int spacing = 80;            // одинаковые промежутки между колонками
+
+// ---- Ore ----
+        g.setColor(Color.lightGray);
+        g.drawString("ore", startX, startY);
+        g.drawString("" + bank.getOre(), startX, startY + 20);
+
+// ---- Wheat ----
+        g.setColor(Color.yellow);
+        g.drawString("wheat", startX + spacing, startY);
+        g.drawString("" + bank.getWheat(), startX + spacing, startY + 20);
+
+// ---- Wood ----
+        g.setColor(Color.green);
+        g.drawString("wood", startX + spacing*2, startY);
+        g.drawString("" + bank.getWood(), startX + spacing*2, startY + 20);
+
+// ---- Brick ----
+        g.setColor(Color.orange);
+        g.drawString("brick", startX + spacing*3, startY);
+        g.drawString("" + bank.getBrick(), startX + spacing*3, startY + 20);
+
+// ---- Sheep ----
+        g.setColor(Color.white);
+        g.drawString("sheep", startX + spacing*4, startY);
+        g.drawString("" + bank.getSheep(), startX + spacing*4, startY + 20);
+
+
+
 
         // --- 3. Окно информации о игроке ---
         if (selectedPlayer != null) {
@@ -149,6 +186,7 @@ public class GameState extends BasicGameState {
                 g.drawString(resLine, infoX + 10, infoY + 160 + line * lineHeightRes);
                 line++;
             }
+
 
         }
         // ширина и высота прогресс-бара

@@ -1,7 +1,10 @@
 package org.example.objects;
 
+import javax.management.StringValueExp;
 import java.util.HashMap;
 import java.util.Map;
+
+
 
 public class Bank {
 
@@ -45,6 +48,25 @@ public class Bank {
         sheepCost.put("ore", 2);
         costs.put("sheep", sheepCost);
     }
+
+        public String getOre() {
+
+            return String.valueOf(resources.get("ore"));
+        }
+        public String getBrick() {
+            return String.valueOf(resources.get("brick"));
+        }
+        public String getWheat() {
+            return String.valueOf(resources.get("wheat"));
+        }
+        public String getSheep() {
+            return String.valueOf(resources.get("sheep"));
+        }
+        public String getWood() {
+        return String.valueOf(resources.get("wood"));
+        }
+
+
 
     public Map<String, Integer> getResources() {
         return resources;
