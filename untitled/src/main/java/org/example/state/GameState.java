@@ -6,10 +6,13 @@ import org.example.objects.Player;
 import org.example.objects.Cities;
 import org.example.map.HexTile;
 import org.example.objects.Village;
+import org.example.render.MenuBarRender;
+import org.example.render.PlayerInfoRender;
+import org.example.render.TimeBarRender;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.*;
 import org.newdawn.slick.Graphics;
-
+import org.example.render.BankRender;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +22,18 @@ public class GameState extends BasicGameState {
     private List<Player> players = new ArrayList<>();
     private int currentPlayerIndex = 0;
 
+    private BankRender bankRenderer;
+    private MenuBarRender menuBarRender;
+    private PlayerInfoRender playerInfoRender;
+    private TimeBarRender timeBarRender;
+
+
     private List<Cities> cities = new ArrayList<>();
     private List<Village> villages = new ArrayList<>();
     private List<HexTile> tiles = new ArrayList<>();
     private int stateID;
     private Bank bank;
+
 
     private boolean villagePlacedThisTurn = false;
     private Player selectedPlayer = null; // окно информации о игроке
@@ -43,6 +53,12 @@ public class GameState extends BasicGameState {
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
+
+        menuBarRender = new MenuBarRender();
+        bankRenderer = new BankRender();
+        playerInfoRender = new PlayerInfoRender();
+        timeBarRender = new TimeBarRender();
+
         bank = new Bank();
 
         // создаём игроков
@@ -78,132 +94,27 @@ public class GameState extends BasicGameState {
 
         int width = container.getWidth();
         int height = container.getHeight();
-
-        // --- 1. Рисуем карту (слева) ---
-        for (HexTile tile : tiles) {
-            tile.render(g);
-        }
-
-        // --- 2. Рисуем меню справа ---
         int menuWidth = width / 4;
         int menuX = width - menuWidth - 20; // сдвиг левее правого края
         int menuY = height / 6;
         int lineHeight = 40;
 
-        g.setColor(Color.darkGray);
-        g.fillRect(menuX, 0, menuWidth, height);
 
-        g.setColor(Color.white);
-        g.drawRect(menuX, 0, menuWidth, height);
 
-        g.drawString("Players:", menuX + 10, menuY - 30);
-
-        for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
-            int iconY = menuY + i * lineHeight;
-
-            if (i == currentPlayerIndex) {
-                g.setColor(Color.green);
-                g.fillRect(menuX + 5, iconY - 5, menuWidth - 10, lineHeight);
-                g.setColor(Color.white);
-            }
-
-            g.setColor(Color.blue);
-            g.fillOval(menuX + 10, iconY, 20, 20);
-
-            g.setColor(Color.white);
-            g.drawString(p.getName(), menuX + 40, iconY);
+        // --- 1. Рисуем карту (слева) ---
+        for (HexTile tile : tiles) {
+            tile.render(g);
         }
-        g.drawString("Bank", menuX + 10, menuY + 190);
-
-        int startX = menuX + 10;     // начальная позиция
-        int startY = menuY + 220;    // первая строка
-        int spacing = 80;            // одинаковые промежутки между колонками
-
-// ---- Ore ----
-        g.setColor(Color.lightGray);
-        g.drawString("ore", startX, startY);
-        g.drawString("" + bank.getOre(), startX, startY + 20);
-
-// ---- Wheat ----
-        g.setColor(Color.yellow);
-        g.drawString("wheat", startX + spacing, startY);
-        g.drawString("" + bank.getWheat(), startX + spacing, startY + 20);
-
-// ---- Wood ----
-        g.setColor(Color.green);
-        g.drawString("wood", startX + spacing*2, startY);
-        g.drawString("" + bank.getWood(), startX + spacing*2, startY + 20);
-
-// ---- Brick ----
-        g.setColor(Color.orange);
-        g.drawString("brick", startX + spacing*3, startY);
-        g.drawString("" + bank.getBrick(), startX + spacing*3, startY + 20);
-
-// ---- Sheep ----
-        g.setColor(Color.white);
-        g.drawString("sheep", startX + spacing*4, startY);
-        g.drawString("" + bank.getSheep(), startX + spacing*4, startY + 20);
-
-
-
+        // --- 2. Окно информации---
+        menuBarRender.render(width, height, players, g, currentPlayerIndex);
 
         // --- 3. Окно информации о игроке ---
-        if (selectedPlayer != null) {
-            int infoWidth = width / 5;
-            int infoHeight = height / 2;
-            int infoX = width - infoWidth - menuWidth - 40;
-            int infoY = 50;
+        playerInfoRender.render(selectedPlayer, g, width, height, menuWidth);
 
-            g.setColor(new Color(0, 0, 0, 200));
-            g.fillRect(infoX, infoY, infoWidth, infoHeight);
-
-            g.setColor(Color.white);
-            g.drawRect(infoX, infoY, infoWidth, infoHeight);
-
-            int closeSize = infoWidth / 10;
-            int closeX = infoX + infoWidth - closeSize - 5;
-            int closeY = infoY + 5;
-
-            // крестик
-            g.setColor(Color.red);
-            g.fillRect(closeX, closeY, closeSize, closeSize);
-            g.setColor(Color.white);
-            g.drawLine(closeX, closeY, closeX + closeSize, closeY + closeSize);
-            g.drawLine(closeX + closeSize, closeY, closeX, closeY + closeSize);
-
-            g.setColor(Color.white);
-            g.drawString("Player: " + selectedPlayer.getName(), infoX + 10, infoY + 10);
-            g.drawString("Village: " + selectedPlayer.getVillagesCount(), infoX + 10, infoY + 40);
-            g.drawString("Cities: " + selectedPlayer.getCitiesCount(), infoX + 10, infoY + 70);
-            g.drawString("Score: " + selectedPlayer.getScore(), infoX + 10, infoY + 100);
-            g.drawString("Resources:", infoX + 10, infoY + 130);
-
-            int lineHeightRes = 30;
-            int line = 0;
-            for (Map.Entry<String, Integer> entry : selectedPlayer.getResources().entrySet()) {
-                String resLine = entry.getKey() + ": " + entry.getValue();
-                g.drawString(resLine, infoX + 10, infoY + 160 + line * lineHeightRes);
-                line++;
-            }
-
-
-        }
         // ширина и высота прогресс-бара
-        float barWidth = (width / 2f) * ((float) turnTimer / turnTime); // половина ширины окна
-        float barHeight = height / 20f; // высота увеличена в 2 раза
+       timeBarRender.render(width, height, g, turnTimer, turnTime);
 
-// позиция
-        float barX = width / 30f;
-        float barY = height / 15f;
-
-// заполнение
-        g.setColor(Color.red);
-        g.fillRect(barX, barY, barWidth, barHeight);
-
-// рамка
-        g.setColor(Color.white);
-        g.drawRect(barX, barY, width / 2f, barHeight);
+       bankRenderer.render(g, bank, menuX, menuY);
 
         // --- 4. Кнопка "End Turn" ---
         int endTurnWidth = width / 6;
