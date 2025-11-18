@@ -1,10 +1,7 @@
 package org.example.objects;
 
-import javax.management.StringValueExp;
 import java.util.HashMap;
 import java.util.Map;
-
-
 
 public class Bank {
 
@@ -27,57 +24,42 @@ public class Bank {
         woodCost.put("wheat", 1);
         costs.put("wood", woodCost);
 
-        // Пример: для покупки 1 brick нужно 1 wood и 1 sheep
+        // Для покупки 1 brick нужно 1 wood и 1 sheep
         Map<String, Integer> brickCost = new HashMap<>();
         brickCost.put("wood", 1);
         brickCost.put("sheep", 1);
         costs.put("brick", brickCost);
 
+        // Для покупки 1 wheat нужно 1 brick и 1 sheep
         Map<String, Integer> wheatCost = new HashMap<>();
-        wheatCost.put("break", 1);
+        wheatCost.put("brick", 1);
         wheatCost.put("sheep", 1);
         costs.put("wheat", wheatCost);
 
+        // Для покупки 1 ore нужно 2 wood и 2 sheep
         Map<String, Integer> oreCost = new HashMap<>();
         oreCost.put("wood", 2);
         oreCost.put("sheep", 2);
         costs.put("ore", oreCost);
 
+        // Для покупки 1 sheep нужно 2 brick и 2 ore
         Map<String, Integer> sheepCost = new HashMap<>();
-        sheepCost.put("break", 2);
+        sheepCost.put("brick", 2);
         sheepCost.put("ore", 2);
         costs.put("sheep", sheepCost);
     }
 
-        public String getOre() {
+    public String getOre() { return String.valueOf(resources.get("ore")); }
+    public String getBrick() { return String.valueOf(resources.get("brick")); }
+    public String getWheat() { return String.valueOf(resources.get("wheat")); }
+    public String getSheep() { return String.valueOf(resources.get("sheep")); }
+    public String getWood() { return String.valueOf(resources.get("wood")); }
 
-            return String.valueOf(resources.get("ore"));
-        }
-        public String getBrick() {
-            return String.valueOf(resources.get("brick"));
-        }
-        public String getWheat() {
-            return String.valueOf(resources.get("wheat"));
-        }
-        public String getSheep() {
-            return String.valueOf(resources.get("sheep"));
-        }
-        public String getWood() {
-        return String.valueOf(resources.get("wood"));
-        }
+    public Map<String, Integer> getResources() { return resources; }
 
-
-
-    public Map<String, Integer> getResources() {
-        return resources;
-    }
-
-    public Map<String, Integer> getCost(String resource) {
-        return costs.get(resource);
-    }
+    public Map<String, Integer> getCost(String resource) { return costs.get(resource); }
 
     public boolean sell(String resource) {
-        // уменьшить количество ресурса в банке
         if (resources.containsKey(resource) && resources.get(resource) > 0) {
             resources.put(resource, resources.get(resource) - 1);
             return true;
@@ -95,21 +77,21 @@ public class Bank {
     }
 
     public boolean buy(Player player, String resource) {
-        if (!canBuy(player.getResources(), resource)) return false;
-
-        // списываем ресурсы у игрока
         Map<String, Integer> cost = getCost(resource);
-        for (String res : cost.keySet()) {
-            player.buyResources(res, cost.get(res));
+        if (cost == null) return false;
+
+        // Проверяем, есть ли у игрока нужные ресурсы
+        if (!player.spendResources(cost)) {
+            return false; // недостаточно ресурсов
         }
 
-        // даём игроку купленный ресурс
+        // Даём игроку купленный ресурс
         player.addResource(resource, 1);
 
-        // уменьшаем ресурс в банке
+        // Уменьшаем ресурс в банке
         sell(resource);
 
         return true;
-
     }
+
 }

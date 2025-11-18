@@ -9,13 +9,11 @@ import org.example.objects.Village;
 import org.example.render.MenuBarRender;
 import org.example.render.PlayerInfoRender;
 import org.example.render.TimeBarRender;
+import org.example.render.BankRender;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.*;
-import org.newdawn.slick.Graphics;
-import org.example.render.BankRender;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class GameState extends BasicGameState {
 
@@ -27,16 +25,17 @@ public class GameState extends BasicGameState {
     private PlayerInfoRender playerInfoRender;
     private TimeBarRender timeBarRender;
 
-
     private List<Cities> cities = new ArrayList<>();
     private List<Village> villages = new ArrayList<>();
     private List<HexTile> tiles = new ArrayList<>();
     private int stateID;
     private Bank bank;
 
-
     private boolean villagePlacedThisTurn = false;
-    private Player selectedPlayer = null; // окно информации о игроке
+    private Player selectedPlayer = null;
+
+    private final int turnTime = 30_000;
+    private int turnTimer = turnTime;
 
     public GameState(int id) {
         this.stateID = id;
@@ -53,7 +52,6 @@ public class GameState extends BasicGameState {
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
-
         menuBarRender = new MenuBarRender();
         bankRenderer = new BankRender();
         playerInfoRender = new PlayerInfoRender();
@@ -62,8 +60,8 @@ public class GameState extends BasicGameState {
         bank = new Bank();
 
         // создаём игроков
-        players.add(new Player("Players 1", 1));
-        players.add(new Player("Players 2", 2));
+        players.add(new Player("Player 1", 1));
+        players.add(new Player("Player 2", 2));
 
         String[] types = {"wood", "brick", "sheep", "wheat", "ore", "desert"};
         float r = 50; // радиус гекса
@@ -91,32 +89,30 @@ public class GameState extends BasicGameState {
 
     @Override
     public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-
         int width = container.getWidth();
         int height = container.getHeight();
         int menuWidth = width / 4;
-        int menuX = width - menuWidth - 20; // сдвиг левее правого края
+        int menuX = width - menuWidth - 20;
         int menuY = height / 6;
-        int lineHeight = 40;
 
-
-
-        // --- 1. Рисуем карту (слева) ---
+        // Рисуем карту
         for (HexTile tile : tiles) {
             tile.render(g);
         }
-        // --- 2. Окно информации---
+
+        // Меню игроков
         menuBarRender.render(width, height, players, g, currentPlayerIndex);
 
-        // --- 3. Окно информации о игроке ---
+        // Информация о выбранном игроке
         playerInfoRender.render(selectedPlayer, g, width, height, menuWidth);
 
-        // ширина и высота прогресс-бара
-       timeBarRender.render(width, height, g, turnTimer, turnTime);
+        // Таймер
+        timeBarRender.render(width, height, g, turnTimer, turnTime);
 
-       bankRenderer.render(g, bank, menuX, menuY);
+        // Банк
+        bankRenderer.render(g, bank, menuX, menuY);
 
-        // --- 4. Кнопка "End Turn" ---
+        // Кнопка "End Turn"
         int endTurnWidth = width / 6;
         int endTurnHeight = 50;
         int endTurnX = width / 30;
@@ -124,29 +120,53 @@ public class GameState extends BasicGameState {
 
         g.setColor(Color.orange);
         g.fillRect(endTurnX, endTurnY, endTurnWidth, endTurnHeight);
-
         g.setColor(Color.black);
         g.drawRect(endTurnX, endTurnY, endTurnWidth, endTurnHeight);
-
-        g.setColor(Color.black);
         g.drawString("End Turn", endTurnX + endTurnWidth / 4, endTurnY + 15);
     }
 
-    private void endTurn() {
+    @Override
+    public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
+        Input input = container.getInput();
+
+        if (input.isKeyPressed(Input.KEY_ESCAPE)) {
+            game.enterState(Main.MAIN_MENU);
+        }
+
+        if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+            int mouseX = input.getMouseX();
+            int mouseY = input.getMouseY();
+
+            // Клик по банку
+            bankRenderer.handleClick(getCurrentPlayer(), bank, mouseX, mouseY);
+
+            // Остальные клики
+            handleClick(mouseX, mouseY, container);
+        }
+
+        // Таймер хода
+        turnTimer -= delta;
+        if (turnTimer <= 0) startNewTurn();
+        if (villagePlacedThisTurn) villagePlacedThisTurn = false;
+    }
+
+    private void startNewTurn() {
         currentPlayerIndex++;
         if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
-
         villagePlacedThisTurn = false;
         selectedPlayer = null;
         turnTimer = turnTime;
+    }
 
+    private void endTurn() {
+        startNewTurn();
     }
 
     private void handleClick(float mx, float my, GameContainer container) {
         int width = container.getWidth();
         int height = container.getHeight();
 
-        // --- клик по End Turn ---
+        // Клик по кнопке End Turn
         int endTurnWidth = width / 6;
         int endTurnHeight = 50;
         int endTurnX = width / 30;
@@ -155,11 +175,10 @@ public class GameState extends BasicGameState {
         if (mx >= endTurnX && mx <= endTurnX + endTurnWidth &&
                 my >= endTurnY && my <= endTurnY + endTurnHeight) {
             endTurn();
-
             return;
         }
 
-        // --- клик по крестику окна игрока ---
+        // Клик по крестику окна игрока
         if (selectedPlayer != null) {
             int infoWidth = width / 5;
             int infoHeight = height / 2;
@@ -177,7 +196,7 @@ public class GameState extends BasicGameState {
             }
         }
 
-        // --- клик по меню игроков ---
+        // Клик по меню игроков
         int menuWidth = width / 4;
         int menuX = width - menuWidth - 20;
         int menuY = height / 6;
@@ -190,44 +209,12 @@ public class GameState extends BasicGameState {
             int rectWidth = menuWidth - 10;
             int rectHeight = lineHeight;
 
-            if (i == currentPlayerIndex && mx >= rectX && mx <= rectX + rectWidth &&
+            if (i == currentPlayerIndex &&
+                    mx >= rectX && mx <= rectX + rectWidth &&
                     my >= rectY && my <= rectY + rectHeight) {
                 selectedPlayer = players.get(i);
                 break;
             }
-        }
-    }
-    // добавляем поле класса
-    private final int turnTime = 30_000; // 30 секунд в миллисекундах
-    int turnTimer = turnTime;
-
-    // в начале нового хода сбрасываем таймер
-    private void startNewTurn() {
-        currentPlayerIndex++;
-        if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
-        villagePlacedThisTurn = false;
-        selectedPlayer = null;
-        turnTimer = turnTime; // сброс таймера
-    }
-
-    @Override
-    public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-        Input input = container.getInput();
-
-        if (input.isKeyPressed(Input.KEY_ESCAPE)) {
-            game.enterState(Main.MAIN_MENU);
-        }
-
-        if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-            handleClick(input.getMouseX(), input.getMouseY(), container);
-        }
-        // уменьшаем таймер хода
-        turnTimer -= delta;
-        if (turnTimer <= 0) {
-            startNewTurn(); // автоматическое завершение хода
-        }
-        if (villagePlacedThisTurn) {
-            villagePlacedThisTurn = false;
         }
     }
 }

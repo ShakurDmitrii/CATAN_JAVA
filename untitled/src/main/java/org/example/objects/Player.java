@@ -41,36 +41,41 @@ public class Player {
     // РЕСУРСЫ
     // ---------------------------
     public void addResource(String type, int amount) {
-        resources.put(type, resources.get(type) + amount);
+        resources.put(type, resources.getOrDefault(type, 0) + amount);
     }
+
     public void removeResource(String type, int amount) {
-        resources.put(type, resources.get(type) - amount);
-    }
-    public void buyResource(String type, int amount) {
-
+        resources.put(type, resources.getOrDefault(type, 0) - amount);
     }
 
+    /** Проверка, есть ли все ресурсы для стоимости */
     private boolean hasResources(Map<String,Integer> cost) {
         for (String type : cost.keySet()) {
-            if (resources.get(type) < cost.get(type)) return false;
+            if (resources.getOrDefault(type, 0) < cost.get(type)) return false;
         }
         return true;
     }
 
-    public void spendResources(Map<String, Integer> cost) {
+    /** Списание ресурсов для покупки/постройки */
+    public boolean spendResources(Map<String, Integer> cost) {
+        if (!hasResources(cost)) return false;
         for (String type : cost.keySet()) {
             resources.put(type, resources.get(type) - cost.get(type));
         }
+        return true;
     }
+
+    /** Добавление купленного ресурса */
     public void buyResources(String type, int amount) {
-        resources.put(type, resources.getOrDefault(type, 0) + amount);
+        addResource(type, amount);
     }
+
+    public Map<String, Integer> getResources() { return resources; }
 
     // ---------------------------
     // ПОСТРОЙКА ДОРОГИ
     // ---------------------------
     public boolean buildRoad(HexTile tile) {
-
         Map<String,Integer> cost = Map.of(
                 "wood", 1,
                 "brick", 1
@@ -83,7 +88,6 @@ public class Player {
 
         spendResources(cost);
         roadsPlaced++;
-
         System.out.println(name + " построил дорогу!");
         return true;
     }
@@ -92,7 +96,6 @@ public class Player {
     // ПОСТРОЙКА ДЕРЕВНИ
     // ---------------------------
     public boolean buildVillage(HexTile tile) {
-
         Map<String,Integer> cost = Map.of(
                 "wood", 1,
                 "brick", 1,
@@ -108,7 +111,6 @@ public class Player {
         spendResources(cost);
         villagesPlaced++;
         score += 1;
-
         System.out.println(name + " построил деревню!");
         return true;
     }
@@ -117,7 +119,6 @@ public class Player {
     // ПОСТРОЙКА ГОРОДА
     // ---------------------------
     public boolean buildCity(HexTile tile) {
-
         Map<String,Integer> cost = Map.of(
                 "wheat", 2,
                 "ore", 3
@@ -131,7 +132,6 @@ public class Player {
         spendResources(cost);
         citiesPlaced++;
         score += 2;
-
         System.out.println(name + " построил город!");
         return true;
     }
@@ -139,10 +139,10 @@ public class Player {
     public String getVillagesCount() {
         return String.valueOf(villagesPlaced);
     }
+
     public String getCitiesCount() {
         return String.valueOf(citiesPlaced);
     }
-    public int getScore() { return score; }
 
-    public Map<String, Integer> getResources() { return resources; }
+    public int getScore() { return score; }
 }
