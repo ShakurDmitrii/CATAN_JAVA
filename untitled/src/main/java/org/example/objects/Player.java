@@ -13,6 +13,10 @@ public class Player {
 
     private Map<String, Integer> resources;
 
+    private int villagesCount;
+    private int roadsCount;
+    private int citiesCount;
+
     private int roadsPlaced;
     private int villagesPlaced;
     private int citiesPlaced;
@@ -32,6 +36,28 @@ public class Player {
         roadsPlaced = 0;
         villagesPlaced = 0;
         citiesPlaced = 0;
+    }
+    public void addCity(){
+        citiesCount++;
+    }
+    public void addVillage(){
+        villagesCount++;
+    }
+    public void addRoad(){
+        roadsCount++;
+    }
+
+    public int getRoadsCount() {
+        return roadsCount;
+    }
+
+
+    public int getVillagesCount() {
+        return villagesCount;
+    }
+
+    public int getCitiesCount() {
+        return citiesCount;
     }
 
     public int getId() { return id; }
@@ -71,6 +97,9 @@ public class Player {
     }
 
     public Map<String, Integer> getResources() { return resources; }
+    public int getResource(String type) {
+        return resources.getOrDefault(type, 0);
+    }
 
     // ---------------------------
     // ПОСТРОЙКА ДОРОГИ
@@ -136,13 +165,7 @@ public class Player {
         return true;
     }
 
-    public String getVillagesCount() {
-        return String.valueOf(villagesPlaced);
-    }
 
-    public String getCitiesCount() {
-        return String.valueOf(citiesPlaced);
-    }
 
     public int getScore() { return score; }
 }

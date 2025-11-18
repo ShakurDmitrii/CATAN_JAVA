@@ -1,15 +1,9 @@
 package org.example.state;
 
 import org.example.Main;
-import org.example.objects.Bank;
-import org.example.objects.Player;
-import org.example.objects.Cities;
+import org.example.objects.*;
 import org.example.map.HexTile;
-import org.example.objects.Village;
-import org.example.render.MenuBarRender;
-import org.example.render.PlayerInfoRender;
-import org.example.render.TimeBarRender;
-import org.example.render.BankRender;
+import org.example.render.*;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.*;
 import java.util.ArrayList;
@@ -19,17 +13,18 @@ public class GameState extends BasicGameState {
 
     private List<Player> players = new ArrayList<>();
     private int currentPlayerIndex = 0;
+    private HexTile selectedTile = null;
 
-    private BankRender bankRenderer;
+    private BankRender bankRender;
     private MenuBarRender menuBarRender;
     private PlayerInfoRender playerInfoRender;
     private TimeBarRender timeBarRender;
+    private ShopRender shopRender;
 
-    private List<Cities> cities = new ArrayList<>();
-    private List<Village> villages = new ArrayList<>();
     private List<HexTile> tiles = new ArrayList<>();
     private int stateID;
     private Bank bank;
+    private Shop shop;
 
     private boolean villagePlacedThisTurn = false;
     private Player selectedPlayer = null;
@@ -50,21 +45,85 @@ public class GameState extends BasicGameState {
         return stateID;
     }
 
+    private void startNewTurn() {
+        currentPlayerIndex++;
+        if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
+        villagePlacedThisTurn = false;
+        selectedPlayer = null;
+        selectedTile = null;
+        turnTimer = turnTime;
+    }
+
+    private void handleClick(float mx, float my, GameContainer container) {
+        int width = container.getWidth();
+        int height = container.getHeight();
+
+        // кнопка End Turn
+        int endTurnWidth = width / 6;
+        int endTurnHeight = 50;
+        int endTurnX = width / 30;
+        int endTurnY = height - endTurnHeight - 50;
+        if (mx >= endTurnX && mx <= endTurnX + endTurnWidth &&
+                my >= endTurnY && my <= endTurnY + endTurnHeight) {
+            startNewTurn();
+            return;
+        }
+
+        // клик по крестику окна игрока
+        if (selectedPlayer != null) {
+            int infoWidth = width / 5;
+            int infoHeight = height / 2;
+            int menuWidth = width / 4;
+            int infoX = width - infoWidth - menuWidth - 40;
+            int infoY = 50;
+            int closeSize = infoWidth / 10;
+            int closeX = infoX + infoWidth - closeSize - 5;
+            int closeY = infoY + 5;
+
+            if (mx >= closeX && mx <= closeX + closeSize &&
+                    my >= closeY && my <= closeY + closeSize) {
+                selectedPlayer = null;
+                return;
+            }
+        }
+
+        // клик по меню игроков
+        int menuWidth = width / 4;
+        int menuX = width - menuWidth - 20;
+        int menuY = height / 6;
+        int lineHeight = 40;
+        for (int i = 0; i < players.size(); i++) {
+            int rectX = menuX + 5;
+            int rectY = menuY + i * lineHeight;
+            int rectWidth = menuWidth - 10;
+            int rectHeight = lineHeight;
+
+            if (mx >= rectX && mx <= rectX + rectWidth &&
+                    my >= rectY && my <= rectY + rectHeight) {
+                selectedPlayer = players.get(i);
+                break;
+            }
+        }
+    }
+
+
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
         menuBarRender = new MenuBarRender();
-        bankRenderer = new BankRender();
+        bankRender = new BankRender();
         playerInfoRender = new PlayerInfoRender();
         timeBarRender = new TimeBarRender();
+        shopRender = new ShopRender();
 
         bank = new Bank();
+        shop = new Shop();
 
-        // создаём игроков
         players.add(new Player("Player 1", 1));
         players.add(new Player("Player 2", 2));
 
+        // создаем тайлы карты
         String[] types = {"wood", "brick", "sheep", "wheat", "ore", "desert"};
-        float r = 50; // радиус гекса
+        float r = 50;
         float dx = (float) (Math.sqrt(3) * r);
         float dy = 1.5f * r;
 
@@ -95,24 +154,16 @@ public class GameState extends BasicGameState {
         int menuX = width - menuWidth - 20;
         int menuY = height / 6;
 
-        // Рисуем карту
         for (HexTile tile : tiles) {
             tile.render(g);
         }
 
-        // Меню игроков
         menuBarRender.render(width, height, players, g, currentPlayerIndex);
-
-        // Информация о выбранном игроке
         playerInfoRender.render(selectedPlayer, g, width, height, menuWidth);
-
-        // Таймер
         timeBarRender.render(width, height, g, turnTimer, turnTime);
+        bankRender.render(g, bank, menuX, menuY);
+        shopRender.render(g, shop, menuX, menuY + 150);
 
-        // Банк
-        bankRenderer.render(g, bank, menuX, menuY);
-
-        // Кнопка "End Turn"
         int endTurnWidth = width / 6;
         int endTurnHeight = 50;
         int endTurnX = width / 30;
@@ -137,84 +188,27 @@ public class GameState extends BasicGameState {
             int mouseX = input.getMouseX();
             int mouseY = input.getMouseY();
 
+            // Выбор тайла на карте
+            selectedTile = null;
+            for (HexTile tile : tiles) {
+                if (tile.contains(mouseX, mouseY)) {
+                    selectedTile = tile;
+                    System.out.println("Выбран тайл: " + tile.getType());
+                    break;
+                }
+            }
+
             // Клик по банку
-            bankRenderer.handleClick(getCurrentPlayer(), bank, mouseX, mouseY);
+            bankRender.handleClick(getCurrentPlayer(), bank, mouseX, mouseY);
+
+            // Клик по магазину, передаем выбранный тайл
+            shopRender.handleClick(getCurrentPlayer(), shop, mouseX, mouseY, selectedTile);
 
             // Остальные клики
             handleClick(mouseX, mouseY, container);
         }
 
-        // Таймер хода
         turnTimer -= delta;
         if (turnTimer <= 0) startNewTurn();
-        if (villagePlacedThisTurn) villagePlacedThisTurn = false;
-    }
-
-    private void startNewTurn() {
-        currentPlayerIndex++;
-        if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
-        villagePlacedThisTurn = false;
-        selectedPlayer = null;
-        turnTimer = turnTime;
-    }
-
-    private void endTurn() {
-        startNewTurn();
-    }
-
-    private void handleClick(float mx, float my, GameContainer container) {
-        int width = container.getWidth();
-        int height = container.getHeight();
-
-        // Клик по кнопке End Turn
-        int endTurnWidth = width / 6;
-        int endTurnHeight = 50;
-        int endTurnX = width / 30;
-        int endTurnY = height - endTurnHeight - 50;
-
-        if (mx >= endTurnX && mx <= endTurnX + endTurnWidth &&
-                my >= endTurnY && my <= endTurnY + endTurnHeight) {
-            endTurn();
-            return;
-        }
-
-        // Клик по крестику окна игрока
-        if (selectedPlayer != null) {
-            int infoWidth = width / 5;
-            int infoHeight = height / 2;
-            int menuWidth = width / 4;
-            int infoX = width - infoWidth - menuWidth - 40;
-            int infoY = 50;
-            int closeSize = infoWidth / 10;
-            int closeX = infoX + infoWidth - closeSize - 5;
-            int closeY = infoY + 5;
-
-            if (mx >= closeX && mx <= closeX + closeSize &&
-                    my >= closeY && my <= closeY + closeSize) {
-                selectedPlayer = null;
-                return;
-            }
-        }
-
-        // Клик по меню игроков
-        int menuWidth = width / 4;
-        int menuX = width - menuWidth - 20;
-        int menuY = height / 6;
-        int lineHeight = 40;
-
-        for (int i = 0; i < players.size(); i++) {
-            int textY = menuY + i * lineHeight;
-            int rectX = menuX + 5;
-            int rectY = textY;
-            int rectWidth = menuWidth - 10;
-            int rectHeight = lineHeight;
-
-            if (i == currentPlayerIndex &&
-                    mx >= rectX && mx <= rectX + rectWidth &&
-                    my >= rectY && my <= rectY + rectHeight) {
-                selectedPlayer = players.get(i);
-                break;
-            }
-        }
     }
 }

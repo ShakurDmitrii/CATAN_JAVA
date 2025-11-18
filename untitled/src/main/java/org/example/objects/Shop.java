@@ -44,40 +44,53 @@ public class Shop {
         }
         return true;
     }
-
+    /** Публичный геттер для стоимости здания */
+    public Map<String, Integer> getBuildingCost(String building) {
+        return buildingCosts.get(building);
+    }
     /** Покупка и списание ресурсов */
-    public boolean buy(Player player, String building, HexTile tile) {
-        Map<String, Integer> cost = buildingCosts.get(building);
-        if (cost == null) return false;
 
-        if (!canBuy(player, building)) {
-            System.out.println(player.getName() + " не хватает ресурсов для " + building);
+    public boolean buyBuilding(Player player, String building) {
+        Map<String, Map<String, Integer>> buildingCosts = Map.of(
+                "road", Map.of("wood", 1, "brick", 1),
+                "village", Map.of("wood", 1, "brick", 1, "sheep", 1, "wheat", 1),
+                "city", Map.of("wheat", 2, "ore", 3)
+        );
+
+        Map<String, Integer> cost = buildingCosts.get(building);
+        if (cost == null) {
+            System.out.println("Неизвестная постройка: " + building);
             return false;
         }
 
-        // списываем ресурсы
+        // Проверяем ресурсы
         for (Map.Entry<String, Integer> entry : cost.entrySet()) {
-            player.spendResources(Map.of(entry.getKey(), entry.getValue()));
+            if (player.getResource(entry.getKey()) < entry.getValue()) {
+                System.out.println(player.getName() + " недостаточно ресурсов для " + building + "!");
+                return false;
+            }
         }
 
-        // строим соответствующую постройку
-        boolean success = false;
+        // Списываем ресурсы
+        player.spendResources(cost);
+
+        // Добавляем постройку игроку
         switch (building) {
             case "road":
-                success = player.buildRoad(tile);
+                player.addRoad();      // просто увеличиваем счетчик или добавляем в список
                 break;
             case "village":
-                success = player.buildVillage(tile);
+                player.addVillage();
                 break;
             case "city":
-                success = player.buildCity(tile);
+                player.addCity();
                 break;
         }
 
-        if (success) {
-            System.out.println(player.getName() + " построил " + building + "!");
-        }
-
-        return success;
+        System.out.println(player.getName() + " купил " + building + "!");
+        return true;
     }
+
+
+
 }
