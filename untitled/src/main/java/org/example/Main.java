@@ -27,7 +27,7 @@ public class Main extends StateBasedGame {
     }
 
     public static void main(String[] args) {
-        System.setProperty("org.lwjgl.librarypath", "C:\\lwjgl-2.9.3\\lwjgl-2.9.3\\native\\windows");
+        System.setProperty("org.lwjgl.librarypath", "C:\\Users\\Fyodor\\lwjgl-2.9.3\\native\\windows");
 
         // Отключаем JInput контроллеры
         System.setProperty("net.java.games.input.useDefaultPlugin", "false");
