@@ -22,7 +22,7 @@ export class MapRenderer {
         this.gameState.tiles.forEach(t => {
             let [x, y] = this.calcTileCoords(t.col, t.row)
             this.scene.add
-                .image(x, y, 'tile')
+                .image(x, y, t.tileSprite)
                 .setOrigin(0.5, 0.5)
                 .setDisplaySize(this.tileRadius * 2, this.tileRadius * 2)
         })
